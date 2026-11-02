@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Adventure</title>
+
+  <!-- All visual styling lives in this external file -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ===========================
+     MOVING CLOUDS
+     Purpose:
+     Kani nga part ang katong cloud sa background style lng sya disya maka apekto sa game, 
+     tapos ang css dayun gapalihok sa iyaha.
+=========================== -->
+<div class="cloud cloud-1"></div>
+<div class="cloud cloud-2"></div>
+<div class="cloud cloud-3"></div>
+
+<!-- Main container that holds the entire game -->
+<div class="wrap">
+
+  <!-- ===========================
+       PAGE TITLE
+       Purpose:
+       Displays the game title and a short welcome message.
+       Each letter is inside a <span> so CSS can color or
+       animate each letter individually.
+  =========================== -->
+  <header>
+    <h1 class="title">
+      <span class="a">M</span><span class="b">A</span><span class="c">T</span><span class="d">H</span>
+      &nbsp;
+      <span class="e">A</span><span class="a">D</span><span class="b">V</span><span class="c">E</span><span class="d">N</span><span class="e">T</span><span class="a">U</span><span class="b">R</span><span class="c">E</span>
+    </h1>
+
+    <!-- Small message shown below the title -->
+    <p class="subtitle">Pick your mission, then blast off! 🚀</p>
+  </header>
+
+  <!-- ===========================
+       SETTINGS CARD
+       Purpose:
+       This is the first screen the player sees.
+       Here the player chooses:
+       • Math operation
+       • Difficulty
+       • Number of questions
+       Then presses Start Mission.
+  =========================== -->
+  <section class="card" id="settingsCard">
+
+    <!-- Choose what type of math problem to solve -->
+    <p class="section-label">🎯 Choose an operation</p>
+
+    <!-- Operation buttons -->
+    <div class="pill-row" id="opRow" role="group" aria-label="Choose operation">
+
+      <!-- Addition -->
+      <button class="pill op-add selected" data-op="add">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 5V19M5 12H19"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"/>
+        </svg>
+        Addition
+      </button>
+
+      <!-- Subtraction -->
+      <button class="pill op-sub" data-op="sub">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"/>
+        </svg>
+        Subtraction
+      </button>
+
+      <!-- Multiplication -->
+      <button class="pill op-mult" data-op="mult">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 6L18 18M18 6L6 18"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"/>
+        </svg>
+        Multiplication
+      </button>
+
+      <!-- Division -->
+      <button class="pill op-div" data-op="div">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="6.5" r="1.6" fill="white"/>
+          <path d="M5 12H19"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"/>
+          <circle cx="12" cy="17.5" r="1.6" fill="white"/>
+        </svg>
+        Division
+      </button>
+
+      <!-- Random operation -->
+      <button class="pill op-random" data-op="random">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 6H8L18 18H20M4 18H8L11 14M14 10L18 6H20"
+          stroke="white"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+        </svg>
+        Random
+      </button>
+
+    </div>
+
+    <!-- Difficulty and Goal settings -->
+    <div class="settings-grid">
+
+      <!-- Difficulty selection -->
+      <div>
+
+        <p class="section-label">⭐ Difficulty</p>
+
+        <!-- Player chooses Easy, Medium, or Hard -->
+        <div class="pill-row" id="diffRow">
+
+          <button class="pill diff-pill selected easy"
+          data-diff="easy">
+            Easy
+          </button>
+
+          <button class="pill diff-pill medium"
+          data-diff="medium">
+            Medium
+          </button>
+
+          <button class="pill diff-pill hard"
+          data-diff="hard">
+            Hard
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Number of questions -->
+      <div>
+
+        <p class="section-label">🏁 Goal (questions)</p>
+
+        <div class="pill-row" id="goalRow">
+
+          <button class="pill goal-pill selected"
+          data-goal="3">
+            3
+          </button>
+
+          <button class="pill goal-pill"
+          data-goal="5">
+            5
+          </button>
+
+          <button class="pill goal-pill"
+          data-goal="10">
+            10
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Shows the number range based on difficulty -->
+    <p class="settings-note" id="rangeNote">
+      Numbers from 0 to 5 — nice and easy!
+    </p>
+
+    <!-- Starts the game -->
+    <button class="start-btn" id="startBtn">
+
+      <svg viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none">
+
+        <path d="M12 2C12 2 18 6 18 12C18 15 16.5 17 15 18L14 22H10L9 18C7.5 17 6 15 6 12C6 6 12 2 12 2Z"
+        stroke="white"
+        stroke-width="2"
+        stroke-linejoin="round"/>
+
+        <circle cx="12"
+        cy="10"
+        r="1.6"
+        fill="white"/>
+
+      </svg>
+
+      Start Mission
+
+    </button>
+
+  </section>
+
+  <!-- ===========================
+       PROGRESS CARD
+       Purpose:
+       Shows the player's current score and progress.
+       The rocket moves as the player answers questions.
+  =========================== -->
+  <section class="card progress-card" id="progressCard">
+
+    <div class="progress-top">
+
+      <p class="section-label" id="missionLabel">
+        Mission in progress
+      </p>
+
+      <!-- Current score -->
+      <div class="score-box">
+        Score <b id="scoreVal">0</b> /
+        <span id="goalVal">3</span>
+      </div>
+
+    </div>
+
+    <!-- Progress bar -->
+    <div class="track-outer">
+
+      <!-- Filled progress -->
+      <div class="track-fill" id="trackFill"></div>
+
+      <!-- Decorative stars -->
+      <div class="track-stars" id="trackStars"></div>
+
+      <!-- Rocket that moves as player progresses -->
+      <div class="rocket" id="rocketIcon">
+        🚀
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===========================
+       QUESTION CARD
+       Purpose:
+       Displays the math question.
+       The player enters the answer and presses Submit.
+  =========================== -->
+  <section class="card question-card" id="questionCard">
+
+    <div class="equation">
+
+      <!-- First number -->
+      <div class="num-box n1" id="numOne">7</div>
+
+      <!-- Math operator -->
+      <div class="op-symbol" id="opSymbol">+</div>
+
+      <!-- Second number -->
+      <div class="num-box n2" id="numTwo">2</div>
+
+      <!-- Equal sign -->
+      <div class="op-symbol">=</div>
+
+      <!-- Answer box -->
+      <input
+      class="answer-input"
+      id="answerInput"
+      type="text"
+      inputmode="numeric"
+      pattern="[0-9-]*"
+      autocomplete="off">
+
+    </div>
+
+    <!-- Shows Correct or Wrong -->
+    <p class="feedback" id="feedback"></p>
+
+    <!-- Checks the answer -->
+    <button class="submit-btn" id="submitBtn">
+      Submit
+    </button>
+
+  </section>
+
+  <!-- ===========================
+       COMPLETE CARD
+       Purpose:
+       Appears when the game is finished.
+       Shows the player's score and a message.
+  =========================== -->
+  <section class="card complete-card" id="completeCard">
+
+    <div class="complete-emoji" id="completeEmoji">
+      🏆
+    </div>
+
+    <p class="complete-title" id="completeTitle">
+      Mission Complete!
+    </p>
+
+    <p class="complete-score" id="completeScore">
+      3 / 3 correct
+    </p>
+
+    <p class="complete-msg" id="completeMsg">
+      You're a math superstar!
+    </p>
+
+    <!-- Starts another game -->
+    <button class="again-btn" id="againBtn">
+      Play Again
+    </button>
+
+  </section>
+
+  <!-- ===========================
+       HINT BOX
+       Purpose:
+       Shows a small reminder while the game is being played.
+  =========================== -->
+  <div class="hint-box" id="hintBox">
+
+    <span>⭐</span>
+
+    <span id="hintText">
+      Answer 3 questions to complete the mission and earn your score!
+    </span>
+
+  </div>
+
+</div>
+
+  <!-- All the game logic lives in this external file, loaded last so
+       the HTML elements above already exist when it runs -->
+  <script src="JavaScript.js"></script>
+</body>
+</html>

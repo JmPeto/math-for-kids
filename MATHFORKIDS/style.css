@@ -1,0 +1,474 @@
+/* =====================================================================
+   MATH ADVENTURE — STYLESHEET
+   Organized top to bottom in the order things appear on the page:
+   1. Design tokens (colors, radii, shadows)
+   2. Base page + background clouds
+   3. Layout wrapper + header
+   4. Cards (shared style for every white rounded box)
+   5. Settings screen (operation / difficulty / goal pills)
+   6. Progress screen (rocket + star track)
+   7. Question screen (the equation + answer input)
+   8. Completion screen (result + confetti)
+   9. Small helpers
+===================================================================== */
+
+/* -----------------------------------------------------------------
+   1. DESIGN TOKENS
+   CSS custom properties (variables) so every color/radius/shadow is
+   defined once here and reused everywhere else with var(--name).
+   Change a value here and it updates the whole page.
+------------------------------------------------------------------ */
+:root{
+  --sky-top:#BFE8FF;
+  --sky-bottom:#EAF7FF;
+  --ink:#2B3A55;          /* main text color */
+  --ink-soft:#5A6B8C;     /* secondary/muted text */
+  --sun:#FFC93C;
+  --sun-dark:#F0A500;
+  --grass:#3FBF8F;
+  --grass-dark:#22996B;
+  --coral:#FF6F91;
+  --coral-dark:#E84F76;
+  --sky-blue:#3DA9E0;
+  --sky-blue-dark:#2789C2;
+  --purple:#8B6FEE;
+  --purple-dark:#6E4FD6;
+  --card-bg:#FFFFFF;
+  --track-bg:#DCEFFA;
+  --radius-lg:28px;
+  --radius-md:18px;
+  --radius-sm:12px;
+  --shadow-card: 0 12px 30px rgba(43,58,85,0.12);
+  --shadow-btn: 0 6px 0 rgba(0,0,0,0.15);
+}
+
+/* Reset box-sizing so padding/border never add extra width to elements */
+*{ box-sizing:border-box; }
+
+/* -----------------------------------------------------------------
+   2. BASE PAGE + BACKGROUND CLOUDS
+------------------------------------------------------------------ */
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Nunito', sans-serif;
+  color:var(--ink);
+  /* Soft sky gradient background, plus two faint light "glows" near the top */
+  background:
+    radial-gradient(circle at 15% 12%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0) 90px),
+    radial-gradient(circle at 85% 8%, rgba(255,255,255,0.7) 0px, rgba(255,255,255,0) 70px),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, #F7FCFF 100%);
+  overflow-x:hidden;   /* clouds drift off-screen; don't let that cause a scrollbar */
+  position:relative;
+  padding-bottom:40px;
+}
+
+/* Each ".cloud" is a rounded rectangle with two circular "bumps" (::before/::after)
+   to fake a fluffy cloud shape, then animated drifting left-to-right. */
+.cloud{
+  position:absolute;
+  background:#fff;
+  border-radius:50px;
+  opacity:0.8;
+  filter: blur(0.2px);
+}
+.cloud::before, .cloud::after{
+  content:"";
+  position:absolute;
+  background:#fff;
+  border-radius:50%;
+}
+.cloud-1{ width:90px; height:34px; top:6%; left:-120px; animation: drift 34s linear infinite; }
+.cloud-1::before{ width:50px; height:50px; top:-24px; left:10px; }
+.cloud-1::after{ width:36px; height:36px; top:-16px; left:50px; }
+.cloud-2{ width:70px; height:26px; top:16%; left:-100px; animation: drift 46s linear infinite; animation-delay:-10s; }
+.cloud-2::before{ width:38px; height:38px; top:-18px; left:8px; }
+.cloud-2::after{ width:28px; height:28px; top:-12px; left:36px; }
+.cloud-3{ width:60px; height:22px; top:4%; left:-90px; animation: drift 55s linear infinite; animation-delay:-25s; }
+.cloud-3::before{ width:32px; height:32px; top:-15px; left:6px; }
+.cloud-3::after{ width:24px; height:24px; top:-10px; left:30px; }
+
+/* Move a cloud from just off the left edge to just off the right edge */
+@keyframes drift{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(calc(100vw + 200px)); }
+}
+
+/* If the user's OS says "reduce motion", turn off clouds and speed every
+   animation up to effectively instant, out of respect for that preference */
+@media (prefers-reduced-motion: reduce){
+  .cloud{ animation: none !important; }
+  *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+/* -----------------------------------------------------------------
+   3. LAYOUT WRAPPER + HEADER
+------------------------------------------------------------------ */
+.wrap{
+  position:relative;
+  max-width:640px;   /* keeps the game centered and readable on big screens */
+  margin:0 auto;
+  padding:34px 20px 10px;
+  z-index:2;         /* sits above the clouds */
+}
+
+header{ text-align:center; margin-bottom:22px; }
+
+.title{
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:clamp(34px, 8vw, 48px); /* scales smoothly between mobile and desktop */
+  margin:0;
+  letter-spacing:0.5px;
+  line-height:1.05;
+}
+/* Each letter of the title gets its own color via a wrapping <span> in the HTML */
+.title .a{color:var(--coral);}
+.title .b{color:var(--sky-blue);}
+.title .c{color:var(--sun-dark);}
+.title .d{color:var(--grass-dark);}
+.title .e{color:var(--purple);}
+
+.subtitle{
+  margin:6px 0 0;
+  color:var(--ink-soft);
+  font-weight:700;
+  font-size:15px;
+}
+
+/* -----------------------------------------------------------------
+   4. CARDS
+   Shared white rounded-box style used by every section
+   (settings / progress / question / complete).
+------------------------------------------------------------------ */
+.card{
+  background:var(--card-bg);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:22px 20px;
+  margin-bottom:18px;
+}
+
+.section-label{
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  font-size:15px;
+  color:var(--ink);
+  margin:0 0 10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* -----------------------------------------------------------------
+   5. SETTINGS SCREEN — operation / difficulty / goal buttons
+   All the choice buttons share the ".pill" class. A button only looks
+   "active" once JavaScript.js adds the ".selected" class to it.
+------------------------------------------------------------------ */
+.pill-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.pill{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  font-size:15px;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:var(--radius-md);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  opacity:0.4;              /* unselected pills look "dimmed" */
+  transform:scale(0.97);
+  transition: opacity 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+}
+.pill:active{ transform: translateY(2px) scale(0.97); box-shadow:0 2px 0 rgba(0,0,0,0.15); }
+.pill.selected{ opacity:1; transform:scale(1); box-shadow: 0 4px 0 rgba(0,0,0,0.18); } /* the chosen one is full-color */
+.pill:focus-visible{ outline:3px solid #2B3A55; outline-offset:2px; } /* visible outline for keyboard users */
+.pill svg{ width:18px; height:18px; flex-shrink:0; }
+
+/* Operation pill colors — one signature color per operation */
+.op-add{ background:var(--grass); }
+.op-sub{ background:var(--sky-blue); }
+.op-mult{ background:var(--purple); }
+.op-div{ background:var(--sun-dark); }
+.op-random{ background:var(--coral); }
+
+/* Difficulty pills: neutral gray until selected, then colored by level */
+.diff-pill{ background:var(--ink-soft); }
+.diff-pill.selected.easy{ background:var(--grass-dark); }
+.diff-pill.selected.medium{ background:var(--sun-dark); }
+.diff-pill.selected.hard{ background:var(--coral-dark); }
+
+/* Goal (number of questions) pills */
+.goal-pill{ background:var(--ink-soft); min-width:56px; justify-content:center; }
+.goal-pill.selected{ background:var(--sky-blue-dark); }
+
+/* Difficulty + Goal sit side by side on wide screens, stacked on narrow ones */
+.settings-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
+  margin-top:18px;
+}
+@media (max-width:480px){
+  .settings-grid{ grid-template-columns: 1fr; }
+}
+
+.start-btn{
+  width:100%;
+  margin-top:20px;
+  border:none;
+  cursor:pointer;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:19px;
+  color:#fff;
+  background: var(--grass);
+  padding:16px;
+  border-radius:var(--radius-md);
+  box-shadow: var(--shadow-btn);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+/* Pressed-button effect: moves down and its shadow shrinks, like a real button */
+.start-btn:active{ transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+.start-btn:focus-visible{ outline:3px solid #2B3A55; outline-offset:3px; }
+
+/* -----------------------------------------------------------------
+   6. PROGRESS SCREEN — rocket + star track
+   Hidden by default (display:none); JavaScript.js adds ".active"
+   to reveal it once a mission starts.
+------------------------------------------------------------------ */
+.progress-card{ display:none; }
+.progress-card.active{ display:block; }
+
+.progress-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.score-box{
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  color:var(--ink-soft);
+  font-size:14px;
+}
+.score-box b{ color:var(--grass-dark); font-size:20px; }
+
+.track-outer{
+  position:relative;
+  height:64px;
+  background:var(--track-bg);
+  border-radius:32px;
+  overflow:hidden;
+  margin-bottom:4px;
+}
+/* Green fill bar that grows as questions are answered (width set by JS) */
+.track-fill{
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:0%;
+  background:linear-gradient(90deg, #A6E9CE, #6FD9AE);
+  transition: width 0.5s cubic-bezier(.4,1.4,.6,1); /* smooth "bouncy" grow */
+  border-radius:32px;
+}
+.track-stars{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding:0 30px;
+}
+.track-star{
+  font-size:18px;
+  opacity:0.5;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.track-star.lit{ opacity:1; transform: scale(1.25); } /* JS adds ".lit" per correct answer */
+.rocket{
+  position:absolute;
+  top:50%;
+  left:0%;
+  transform: translate(-10px, -50%);
+  font-size:30px;
+  transition: left 0.6s cubic-bezier(.34,1.56,.64,1); /* rocket "hops" forward */
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.2));
+}
+
+/* -----------------------------------------------------------------
+   7. QUESTION SCREEN — the equation and answer box
+------------------------------------------------------------------ */
+.question-card{ display:none; text-align:center; }
+.question-card.active{ display:block; }
+
+.equation{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  margin:18px 0 8px;
+  flex-wrap:wrap;
+}
+.num-box{
+  min-width:76px;
+  height:76px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:34px;
+  padding:0 10px;
+}
+.num-box.n1{ background:#EAF6FF; color:var(--sky-blue-dark); border:3px solid #BFE6FF; }
+.num-box.n2{ background:#FFEFF3; color:var(--coral-dark); border:3px solid #FFD4DF; }
+.op-symbol{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:32px; color:var(--ink); }
+
+.answer-input{
+  width:110px;
+  height:76px;
+  border-radius:18px;
+  border:3px solid #D9CCFF;
+  background:#F6F2FF;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:34px;
+  text-align:center;
+  color:var(--purple-dark);
+}
+.answer-input:focus{ outline:none; border-color:var(--purple); background:#fff; }
+/* JS adds these classes briefly after Submit, to show right/wrong at a glance */
+.answer-input.wrong-shake{ animation: shake 0.4s ease; border-color:var(--coral-dark); background:#FFE9EE; }
+.answer-input.right-glow{ border-color:var(--grass-dark); background:#E8FBF2; }
+
+@keyframes shake{
+  0%,100%{ transform: translateX(0); }
+  20%{ transform: translateX(-8px); }
+  40%{ transform: translateX(8px); }
+  60%{ transform: translateX(-6px); }
+  80%{ transform: translateX(6px); }
+}
+
+.feedback{
+  min-height:28px; /* reserves space so the layout doesn't jump when text appears */
+  font-family:'Fredoka', sans-serif;
+  font-weight:600;
+  font-size:17px;
+  margin:6px 0 4px;
+}
+.feedback.correct{ color:var(--grass-dark); }
+.feedback.incorrect{ color:var(--coral-dark); }
+
+.submit-btn{
+  margin-top:12px;
+  border:none;
+  cursor:pointer;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:18px;
+  color:#fff;
+  background:var(--purple);
+  padding:14px 40px;
+  border-radius:var(--radius-md);
+  box-shadow:0 5px 0 var(--purple-dark);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s ease;
+}
+.submit-btn:disabled{ opacity:0.5; cursor:not-allowed; } /* briefly disabled while feedback shows */
+.submit-btn:not(:disabled):active{ transform: translateY(3px); box-shadow:0 2px 0 var(--purple-dark); }
+.submit-btn:focus-visible{ outline:3px solid #2B3A55; outline-offset:3px; }
+
+/* -----------------------------------------------------------------
+   8. COMPLETION SCREEN — final result + confetti
+------------------------------------------------------------------ */
+.complete-card{ display:none; text-align:center; position:relative; overflow:hidden; }
+.complete-card.active{ display:block; }
+
+.complete-emoji{ font-size:56px; }
+.complete-title{
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:26px;
+  margin:6px 0 2px;
+}
+.complete-score{
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:20px;
+  color:var(--grass-dark);
+  margin-bottom:6px;
+}
+.complete-msg{ color:var(--ink-soft); font-weight:700; margin-bottom:14px; }
+
+.again-btn{
+  border:none;
+  cursor:pointer;
+  font-family:'Fredoka', sans-serif;
+  font-weight:700;
+  font-size:17px;
+  color:#fff;
+  background:var(--sky-blue);
+  padding:14px 30px;
+  border-radius:var(--radius-md);
+  box-shadow:0 5px 0 var(--sky-blue-dark);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.again-btn:active{ transform: translateY(3px); box-shadow:0 2px 0 var(--sky-blue-dark); }
+
+/* Each confetti piece is a small colored rectangle that JS spawns and
+   animates falling + spinning from the top of the completion card */
+.confetti-piece{
+  position:absolute;
+  top:-20px;
+  width:10px;
+  height:14px;
+  opacity:0.9;
+  animation: fall 2.2s ease-in forwards;
+}
+@keyframes fall{
+  to{ transform: translateY(340px) rotate(400deg); opacity:0; }
+}
+
+/* -----------------------------------------------------------------
+   9. SMALL HELPERS
+------------------------------------------------------------------ */
+.hint-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#FFF7E0;
+  border:1px solid #FFE7A8;
+  border-radius:var(--radius-md);
+  padding:12px 16px;
+  color:#8A6A00;
+  font-weight:700;
+  font-size:14px;
+}
+
+.settings-note{
+  text-align:center;
+  color:var(--ink-soft);
+  font-weight:700;
+  font-size:13px;
+  margin-top:-6px;
+  margin-bottom:14px;
+}
+
+/* Utility class for text that should exist for screen readers only
+   (not used by default in this build, but handy to keep around) */
+.visually-hidden{
+  position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+}
